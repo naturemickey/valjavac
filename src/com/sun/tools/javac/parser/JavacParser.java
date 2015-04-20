@@ -168,6 +168,7 @@ import com.sun.tools.javac.tree.JCTree.JCThrow;
 import com.sun.tools.javac.tree.JCTree.JCTypeApply;
 import com.sun.tools.javac.tree.JCTree.JCTypeParameter;
 import com.sun.tools.javac.tree.JCTree.JCValExpression;
+import com.sun.tools.javac.tree.JCTree.JCVarExpression;
 import com.sun.tools.javac.tree.JCTree.JCVariableDecl;
 import com.sun.tools.javac.tree.JCTree.Tag;
 import com.sun.tools.javac.tree.JCTree.TypeBoundKind;
@@ -1514,8 +1515,8 @@ public class JavacParser implements Parser {
                 //return illegal();
             }
             break;
-        case VAL: return new JCValExpression();
-        
+        case VAL: return new JCValExpression(); // ADD BY ZHOUYOU
+        case VAR: return new JCVarExpression(); // ADD BY ZHOUYOU
         default:
             return illegal();
         }

@@ -637,6 +637,13 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
 		public <R, D> R accept(TreeVisitor<R, D> v, D d) {
 			return null;
 		}
+		
+		public JCExpression convert(JCExpression init) {
+			if (init == null) {
+				new JCIdent(Names.);
+			}
+			return null;
+		}
     }
     /**
      * ADD BY ZHOUYOU
@@ -861,6 +868,9 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
                          VarSymbol sym) {
             this.mods = mods;
             this.name = name;
+            if(vartype instanceof JCVarExpression) { // ADD BY ZHOUYOU
+            	vartype = ((JCVarExpression)vartype).convert(init);
+            }
             this.vartype = vartype;
             this.init = init;
             this.sym = sym;
