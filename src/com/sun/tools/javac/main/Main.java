@@ -25,6 +25,20 @@
 
 package com.sun.tools.javac.main;
 
+import static com.sun.tools.javac.main.Option.BOOTCLASSPATH;
+import static com.sun.tools.javac.main.Option.D;
+import static com.sun.tools.javac.main.Option.FULLVERSION;
+import static com.sun.tools.javac.main.Option.HELP;
+import static com.sun.tools.javac.main.Option.PLUGIN;
+import static com.sun.tools.javac.main.Option.PROFILE;
+import static com.sun.tools.javac.main.Option.S;
+import static com.sun.tools.javac.main.Option.SOURCE;
+import static com.sun.tools.javac.main.Option.TARGET;
+import static com.sun.tools.javac.main.Option.VERSION;
+import static com.sun.tools.javac.main.Option.X;
+import static com.sun.tools.javac.main.Option.XDOCLINT;
+import static com.sun.tools.javac.main.Option.XDOCLINT_CUSTOM;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -52,11 +66,17 @@ import com.sun.tools.javac.jvm.Profile;
 import com.sun.tools.javac.jvm.Target;
 import com.sun.tools.javac.processing.AnnotationProcessingError;
 import com.sun.tools.javac.processing.JavacProcessingEnvironment;
-import com.sun.tools.javac.util.*;
+import com.sun.tools.javac.util.ClientCodeException;
+import com.sun.tools.javac.util.Context;
+import com.sun.tools.javac.util.FatalError;
+import com.sun.tools.javac.util.List;
+import com.sun.tools.javac.util.ListBuffer;
+import com.sun.tools.javac.util.Log;
 import com.sun.tools.javac.util.Log.PrefixKind;
 import com.sun.tools.javac.util.Log.WriterKind;
+import com.sun.tools.javac.util.Options;
+import com.sun.tools.javac.util.PropagatedException;
 import com.sun.tools.javac.util.ServiceLoader;
-import static com.sun.tools.javac.main.Option.*;
 
 /** This class provides a command line interface to the javac compiler.
  *

@@ -25,25 +25,136 @@
 
 package com.sun.tools.javac.tree;
 
+import static com.sun.tools.javac.tree.JCTree.Tag.ANNOTATED_TYPE;
+import static com.sun.tools.javac.tree.JCTree.Tag.APPLY;
+import static com.sun.tools.javac.tree.JCTree.Tag.ASSERT;
+import static com.sun.tools.javac.tree.JCTree.Tag.ASSIGN;
+import static com.sun.tools.javac.tree.JCTree.Tag.BLOCK;
+import static com.sun.tools.javac.tree.JCTree.Tag.BREAK;
+import static com.sun.tools.javac.tree.JCTree.Tag.CASE;
+import static com.sun.tools.javac.tree.JCTree.Tag.CATCH;
+import static com.sun.tools.javac.tree.JCTree.Tag.CLASSDEF;
+import static com.sun.tools.javac.tree.JCTree.Tag.CONDEXPR;
+import static com.sun.tools.javac.tree.JCTree.Tag.CONTINUE;
+import static com.sun.tools.javac.tree.JCTree.Tag.DOLOOP;
+import static com.sun.tools.javac.tree.JCTree.Tag.ERRONEOUS;
+import static com.sun.tools.javac.tree.JCTree.Tag.EXEC;
+import static com.sun.tools.javac.tree.JCTree.Tag.FOREACHLOOP;
+import static com.sun.tools.javac.tree.JCTree.Tag.FORLOOP;
+import static com.sun.tools.javac.tree.JCTree.Tag.IDENT;
+import static com.sun.tools.javac.tree.JCTree.Tag.IF;
+import static com.sun.tools.javac.tree.JCTree.Tag.IMPORT;
+import static com.sun.tools.javac.tree.JCTree.Tag.INDEXED;
+import static com.sun.tools.javac.tree.JCTree.Tag.LABELLED;
+import static com.sun.tools.javac.tree.JCTree.Tag.LAMBDA;
+import static com.sun.tools.javac.tree.JCTree.Tag.LETEXPR;
+import static com.sun.tools.javac.tree.JCTree.Tag.LITERAL;
+import static com.sun.tools.javac.tree.JCTree.Tag.METHODDEF;
+import static com.sun.tools.javac.tree.JCTree.Tag.MODIFIERS;
+import static com.sun.tools.javac.tree.JCTree.Tag.NEWARRAY;
+import static com.sun.tools.javac.tree.JCTree.Tag.NEWCLASS;
+import static com.sun.tools.javac.tree.JCTree.Tag.PARENS;
+import static com.sun.tools.javac.tree.JCTree.Tag.REFERENCE;
+import static com.sun.tools.javac.tree.JCTree.Tag.RETURN;
+import static com.sun.tools.javac.tree.JCTree.Tag.SELECT;
+import static com.sun.tools.javac.tree.JCTree.Tag.SKIP;
+import static com.sun.tools.javac.tree.JCTree.Tag.SWITCH;
+import static com.sun.tools.javac.tree.JCTree.Tag.SYNCHRONIZED;
+import static com.sun.tools.javac.tree.JCTree.Tag.THROW;
+import static com.sun.tools.javac.tree.JCTree.Tag.TOPLEVEL;
+import static com.sun.tools.javac.tree.JCTree.Tag.TRY;
+import static com.sun.tools.javac.tree.JCTree.Tag.TYPEAPPLY;
+import static com.sun.tools.javac.tree.JCTree.Tag.TYPEARRAY;
+import static com.sun.tools.javac.tree.JCTree.Tag.TYPEBOUNDKIND;
+import static com.sun.tools.javac.tree.JCTree.Tag.TYPECAST;
+import static com.sun.tools.javac.tree.JCTree.Tag.TYPEIDENT;
+import static com.sun.tools.javac.tree.JCTree.Tag.TYPEINTERSECTION;
+import static com.sun.tools.javac.tree.JCTree.Tag.TYPEPARAMETER;
+import static com.sun.tools.javac.tree.JCTree.Tag.TYPETEST;
+import static com.sun.tools.javac.tree.JCTree.Tag.TYPEUNION;
+import static com.sun.tools.javac.tree.JCTree.Tag.VARDEF;
+import static com.sun.tools.javac.tree.JCTree.Tag.WHILELOOP;
+
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.*;
+import java.util.Set;
 
 import javax.lang.model.element.Modifier;
 import javax.lang.model.type.TypeKind;
 import javax.tools.JavaFileObject;
 
-import com.sun.source.tree.*;
-import com.sun.source.tree.LambdaExpressionTree.BodyKind;
-import com.sun.source.tree.MemberReferenceTree.ReferenceMode;
-import com.sun.tools.javac.code.*;
-import com.sun.tools.javac.code.Scope.*;
-import com.sun.tools.javac.code.Symbol.*;
-import com.sun.tools.javac.util.*;
+import com.sun.source.tree.AnnotationTree;
+import com.sun.source.tree.ArrayAccessTree;
+import com.sun.source.tree.ArrayTypeTree;
+import com.sun.source.tree.AssertTree;
+import com.sun.source.tree.AssignmentTree;
+import com.sun.source.tree.BinaryTree;
+import com.sun.source.tree.BlockTree;
+import com.sun.source.tree.BreakTree;
+import com.sun.source.tree.CaseTree;
+import com.sun.source.tree.CatchTree;
+import com.sun.source.tree.ClassTree;
+import com.sun.source.tree.CompilationUnitTree;
+import com.sun.source.tree.CompoundAssignmentTree;
+import com.sun.source.tree.ConditionalExpressionTree;
+import com.sun.source.tree.ContinueTree;
+import com.sun.source.tree.DoWhileLoopTree;
+import com.sun.source.tree.EmptyStatementTree;
+import com.sun.source.tree.EnhancedForLoopTree;
+import com.sun.source.tree.ExpressionStatementTree;
+import com.sun.source.tree.ExpressionTree;
+import com.sun.source.tree.ForLoopTree;
+import com.sun.source.tree.IdentifierTree;
+import com.sun.source.tree.IfTree;
+import com.sun.source.tree.ImportTree;
+import com.sun.source.tree.InstanceOfTree;
+import com.sun.source.tree.IntersectionTypeTree;
+import com.sun.source.tree.LabeledStatementTree;
+import com.sun.source.tree.LambdaExpressionTree;
+import com.sun.source.tree.LiteralTree;
+import com.sun.source.tree.MemberReferenceTree;
+import com.sun.source.tree.MemberSelectTree;
+import com.sun.source.tree.MethodInvocationTree;
+import com.sun.source.tree.MethodTree;
+import com.sun.source.tree.NewArrayTree;
+import com.sun.source.tree.NewClassTree;
+import com.sun.source.tree.ParameterizedTypeTree;
+import com.sun.source.tree.ParenthesizedTree;
+import com.sun.source.tree.PrimitiveTypeTree;
+import com.sun.source.tree.ReturnTree;
+import com.sun.source.tree.StatementTree;
+import com.sun.source.tree.SwitchTree;
+import com.sun.source.tree.SynchronizedTree;
+import com.sun.source.tree.ThrowTree;
+import com.sun.source.tree.Tree;
+import com.sun.source.tree.TreeVisitor;
+import com.sun.source.tree.TryTree;
+import com.sun.source.tree.TypeCastTree;
+import com.sun.source.tree.TypeParameterTree;
+import com.sun.source.tree.UnaryTree;
+import com.sun.source.tree.UnionTypeTree;
+import com.sun.source.tree.VariableTree;
+import com.sun.source.tree.WhileLoopTree;
+import com.sun.source.tree.WildcardTree;
+import com.sun.tools.javac.code.Attribute;
+import com.sun.tools.javac.code.BoundKind;
+import com.sun.tools.javac.code.Flags;
+import com.sun.tools.javac.code.Scope.ImportScope;
+import com.sun.tools.javac.code.Scope.StarImportScope;
+import com.sun.tools.javac.code.Symbol;
+import com.sun.tools.javac.code.Symbol.ClassSymbol;
+import com.sun.tools.javac.code.Symbol.MethodSymbol;
+import com.sun.tools.javac.code.Symbol.PackageSymbol;
+import com.sun.tools.javac.code.Symbol.VarSymbol;
+import com.sun.tools.javac.code.Type;
+import com.sun.tools.javac.code.TypeTag;
+import com.sun.tools.javac.code.Types;
+import com.sun.tools.javac.util.Assert;
 import com.sun.tools.javac.util.JCDiagnostic.DiagnosticPosition;
 import com.sun.tools.javac.util.List;
-
-import static com.sun.tools.javac.tree.JCTree.Tag.*;
+import com.sun.tools.javac.util.ListBuffer;
+import com.sun.tools.javac.util.Name;
+import com.sun.tools.javac.util.Position;
 
 /**
  * Root class for abstract syntax tree nodes. It provides definitions
@@ -619,6 +730,12 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
      * ADD BY ZHOUYOU
      */
     public static class JCVarExpression extends JCExpression {
+    	Name name;
+
+    	public JCVarExpression(Name name, int pos) {
+    		this.name = name;
+    		super.setPos(pos);
+    	}
 		@Override
 		public Kind getKind() {
 			return null;
@@ -640,16 +757,13 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
 		
 		public JCExpression convert(JCExpression init) {
 			if (init == null) {
-				new JCIdent(Names.);
+				return new JCIdent(name.table.fromString("Object"), null);
+			}else if(init instanceof JCNewClass) {
+				JCNewClass jce = (JCNewClass)init;
+				return jce.clazz;
 			}
-			return null;
+			return new JCIdent(name.table.fromString("Object"), null);
 		}
-    }
-    /**
-     * ADD BY ZHOUYOU
-     */
-    public static class JCValExpression extends JCVarExpression {
-    	
     }
 
     /**

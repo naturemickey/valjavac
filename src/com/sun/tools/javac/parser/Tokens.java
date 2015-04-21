@@ -114,7 +114,6 @@ public class Tokens {
      * optionally associated with a name.
      */
     public enum TokenKind implements Formattable, Filter<TokenKind> {
-    	VAL("val", Tag.NAMED), // ADD BY ZHOUYOU
     	VAR("var", Tag.NAMED), // ADD BY ZHOUYOU
     	
         EOF(),
