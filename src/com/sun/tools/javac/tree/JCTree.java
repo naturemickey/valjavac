@@ -758,9 +758,29 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
 		public JCExpression convert(JCExpression init) {
 			if (init == null) {
 				return new JCIdent(name.table.fromString("Object"), null);
-			}else if(init instanceof JCNewClass) {
-				JCNewClass jce = (JCNewClass)init;
+			} else if (init instanceof JCNewClass) {
+				JCNewClass jce = (JCNewClass) init;
 				return jce.clazz;
+			} else if (init instanceof JCTypeCast) {
+				JCTypeCast jce = (JCTypeCast) init;
+				return (JCExpression) jce.clazz;
+			} else if (init instanceof JCLiteral) {
+				JCLiteral jce = (JCLiteral) init;
+				TypeTag tt = jce.typetag;
+
+				Kind kind = tt.getKindLiteral();
+				if (kind == Kind.INT_LITERAL || kind == Kind.LONG_LITERAL || kind == Kind.FLOAT_LITERAL || kind == Kind.DOUBLE_LITERAL
+						|| kind == Kind.BOOLEAN_LITERAL || kind == Kind.CHAR_LITERAL ) {
+					return new JCPrimitiveTypeTree(tt);
+				}
+			} else if (init instanceof JCNewArray) {
+				JCNewArray jce = (JCNewArray) init;
+				if (jce.elemtype != null)
+					return new JCArrayTypeTree(jce.elemtype);
+				else {
+					// 这里要对类型进行自动缩放判断太麻烦了，不玩了，以后自己做其它语言再搞吧。
+					return new JCArrayTypeTree(new JCIdent(name.table.fromString("Object"), null));
+				}
 			}
 			return new JCIdent(name.table.fromString("Object"), null);
 		}
